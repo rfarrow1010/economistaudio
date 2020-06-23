@@ -1,0 +1,7 @@
+*~
+*.pyc
+*.swp
+*.exe
+*.zip
+econdata
+__pycache__
