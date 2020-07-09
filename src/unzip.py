@@ -65,27 +65,34 @@ def scan(datascan=True):
     zipfound = False
     datafound = False
 
+    print("Searching this directory...")
     for root, dirs, files in os.walk("."):
         for f in files:
             if "Issue_" in f:
+                print("Zip file found!")
                 r = (os.path.join(root, f), r[1])
                 zipfound = True
 
     if not zipfound:
+        print("Searching Downloads...")
         for root, dirs, files in os.walk(os.path.join(os.environ['HOME']), "/Downloads"):
             for f in files:
                 if "Issue_" in f:
+                    print("Zip file found!")
                     r = (os.path.join(root, f), r[1])
                     zipfound = True
 
     if not zipfound:
+        print("Searching Desktop...")
         for root, dirs, files in os.walk(os.path.join(os.environ['HOME']), "/Desktop"):
             for f in files:
                 if "Issue_" in f:
+                    print("Zip file found!")
                     r = (os.path.join(root, f), r[1])
                     zipfound = True
 
     if not zipfound:
+        print("Could not find zip file. Is it in Downloads or Desktop?")
         return r
 
 
