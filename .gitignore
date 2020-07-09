@@ -5,3 +5,4 @@
 *.zip
 econdata
 __pycache__
+.DS_Store
