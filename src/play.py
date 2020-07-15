@@ -8,9 +8,10 @@
 
 import os, signal, subprocess
 import time
+import utils
 
 # main file needs to intelligently use the return value here to restart the 
-def playfile(dpath, audioname):
+def playfile(audio_player, dpath, audioname, catalogue):
     '''
     Plays the file at the target directory with the target name.
 
@@ -23,9 +24,12 @@ def playfile(dpath, audioname):
     '''
     r = 0
 
+    # convert catalogue into string for ncurses to display
+    strcat = utils.cat_to_str(catalogue)
+
     # spawns child process that plays audio
     fpath = os.path.join(dpath, audioname)
-    sub = subprocess.Popen(['afplay', '{}'.format(fpath)])
+    sub = subprocess.Popen([audio_player, '{}'.format(fpath)])
 
     # parent process info
     print(f"Now playing: {audioname}")
@@ -79,6 +83,7 @@ def playfile(dpath, audioname):
     # child process
     else:
         while True:
+            # TODO: put the ncurses stuff here
             uin = input()
 
             if uin == 'q':

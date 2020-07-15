@@ -3,7 +3,7 @@
 # Author: Ryan Farrow
 # Date created: 23 Jun 2020
 
-def catalogue(playlist):
+def catalogue(playlist, labels):
     '''
     Catalogues the articles into sections based on topic.
 
@@ -36,24 +36,25 @@ def catalogue(playlist):
     for a in playlist:
         if sections[0] in a:
             if sections[0] is "Obituary -":
-                cat["Obituary"] = playlist.index(a)
+                cat["Obituary"] = labels[playlist.index(a)]
                     
             else:
                 # chop off .mp3 from section headers
-                cat[sections[0][:-4]] = playlist.index(a)
+                cat[sections[0][:-4]] = labels[playlist.index(a)]
                 # remove this header
                 sections.pop(0)
 
 
     return cat
 
-def print_cat(cat):
+def cat_to_str(cat):
     '''
-    Prints the catalogue in readable format. Returns void.
+    Transforms the catalogue to be a formatted string. Returns the string.
     '''
     RSPACE = 4
-
     lspace = max(map(len, cat.keys())) + 1
+
+    s = f""
 
     newheads = cat.keys()
     # format the strings
@@ -65,11 +66,21 @@ def print_cat(cat):
         v.rjust(RSPACE)
 
     # plus 1 for center divider in table
-    print('-'*(lspace+RSPACE+1))
+    s += ('-'*(lspace+RSPACE+1))
+    s += '\n'
     for i, h in enumerate(newheads):
-        print(f"{h}|{newvals[i]}")
+        s += f"{h}|{newvals[i]}"
 
-    print('-'*(lspace+RSPACE+1))
+    s += ('-'*(lspace+RSPACE+1))
 
-    return
+    return s
     
+def last_call(uin, track):
+    '''
+    Produces a string describing the previous user call, which 
+    will be displayed as the first line of the ncurses terminal 
+    output. Takes in the previous user input and the most recently 
+    played track. Returns the string.
+    '''
+
+    pass

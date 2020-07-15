@@ -5,11 +5,35 @@
 
 # https://docs.python-guide.org/writing/structure/
 
+# For the terminal scripting:
+# https://unix.stackexchange.com/questions/43075/how-to-change-the-contents-of-a-line-on-the-terminal-as-opposed-to-writing-a-new
+# http://www.tldp.org/HOWTO/NCURSES-Programming-HOWTO/intro.html
+
 import wave
 import time
 import sys, os, subprocess, shutil
 
 from src import fetch, play, unzip, utils
+
+# labels for catalogue navigation
+LABELS = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'a',
+    's',
+    'd',
+    'f',
+    'g',
+    'h',
+    'j'
+]
 
 # note: will need to take options for specifying the path
 # no options should first search for a directory, then ask 
@@ -25,6 +49,7 @@ def usage(exitcode=0):
     exit(exitcode)
 
 def main():
+    audio_player = ''
     playlist = []
     # command line inputs
     if len(sys.argv) >= 2:
@@ -34,17 +59,11 @@ def main():
         elif sys.argv[1] == '-c':
             shutil.rmtree('econdata')
 
-
-    # command line inputs
-    elif len(sys.argv) > 1:
-        files = fetch.get_files(sys.argv[1])
-        #current_fpath = os.path.join(sys.argv[1], files[0])
-
-        if sys.platform == 'darwin':
-            play.playfile(sys.argv[1], files[0])
-
     # interactive prompt
     else:
+        if sys.platform == 'darwin':
+            audio_player = 'afplay'
+
         if not os.path.isdir("./econdata"):
             (zippath, zipbool) = unzip.scan()
         else:
@@ -73,14 +92,14 @@ def main():
             exit(1)
         
         # make catalogue of sections
-        cat = utils.catalogue(playlist)
+        catalogue = utils.catalogue(playlist, LABELS)
 
         while index < 0 or index > len(playlist) - 1:
             index = int(input("Enter number of track you wish to play: ")) - 1
 
         # play each track starting at index while checking for user input
         while index < len(playlist):
-            val = play.playfile(zippath, playlist[index])
+            val = play.playfile(audio_player, zippath, playlist[index], catalogue)
 
             # index check
             if index < 0:
