@@ -51,6 +51,7 @@ def usage(exitcode=0):
 def main():
     audio_player = ''
     playlist = []
+    val = 0
     # command line inputs
     if len(sys.argv) >= 2:
         if sys.argv[1] == '-h':
@@ -99,33 +100,35 @@ def main():
 
         # play each track starting at index while checking for user input
         while index < len(playlist):
-            val = play.playfile(audio_player, zippath, playlist[index], catalogue)
+            val = play.playfile(audio_player, zippath, playlist[index], catalogue, utils.last_call(val, playlist, index))
 
             # index check
             if index < 0:
                 index = 0
 
-            if index >= len(playlist):
-                print("Playlist fully traversed")
-                exit(0)
-
             # user termination
-            if val == 2:
-                exit(0)
+            if val == ord('q'):
+                break
 
-            # skip to next track, let the index increment
-            elif val == 1:
-                continue 
+            # skip to next track, increment index
+            elif val == ord('n'):
+                index += 1 
 
-            # all other cases: add val to index for desired result
+            # restart this track; index doesn't change
+            elif val == ord('z'):
+                continue
+
+            # go back to previous track; decrement index
+            elif val == ord('p'):
+                index -= 1
+
+            # all other cases: assume it timed out, increment index
             else:
-                index += val
+                index += 1
 
-
-        if index >= len(playlist):
-            print("Playlist fully traversed")
-            exit(0)
-
+            if index >= len(playlist):
+                utils.debug("Playlist fully traversed")
+                break
 
 if __name__ == "__main__":
     main()

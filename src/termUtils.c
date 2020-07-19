@@ -2,6 +2,13 @@
 #include <Python/Python.h>
 #include <ncurses.h>
 
+#if PY_MAJOR_VERSION >= 3
+#define PY3K
+#endif
+
+// credit to https://stackoverflow.com/questions/32295927/failed-c-extension-compilation-for-python
+// for the preprocessor insights
+
 /*
     Author: Ryan Farrow
     Date: 14 Jul 2020
@@ -16,13 +23,7 @@
     gcc -shared -o termUtils.so termUtils.c -framework Python
 */
 
-void init() {
-    initscr();                  // start ncurses
-    raw();                      // take raw input immediately (no enter, no interpretation)
-    noecho();                   // do not echo input
-    keypad(stdscr, TRUE);       // allows use of function keys and directional keys
-}
-
+// Python extension docs: https://docs.python.org/3.8/extending/extending.html
 // note to self: if using malloc, call PyErr_NoMemory on failure to allow Python
 // to handle the exception
 
@@ -41,22 +42,22 @@ void init() {
     Returns the keystroke input by the user. Default value is 0 for unexpected 
     problems.
 */
-static PyObject *
-termUtils_interface(PyObject *self, PyObject *args) {
+static PyObject *termUtils_interface(PyObject *self, PyObject *args) {
     // reading in the arguments
 
     // C string of tuple of args passed into function call
-    const char *audioname;
-    const char *catstring;
-    const char *lastCall;
+    const char *audioname, *catstring, *lastCall;
     int uin = 0;
 
-    if (!PyArg_ParseTuple(args, "s", &audioname, "s", &catstring, "s", &lastCall)) {
+    if (!PyArg_ParseTuple(args, "sss", &audioname, &catstring, &lastCall)) {
         return NULL;
     }
 
     // initialization instructions for ncurses
-    init();
+    initscr();                  // start ncurses
+    cbreak();                   // take input without carriage return, allow interpretation of Ctrl-C
+    noecho();                   // do not echo input
+    keypad(stdscr, TRUE);       // allows use of function keys and directional keys
 
     // if there is a message from last call, display it here
     printw(lastCall);
@@ -94,12 +95,29 @@ termUtils_interface(PyObject *self, PyObject *args) {
     return PyLong_FromLong(uin);
 }
 
-int main() {
-    init();
-    printw("Hello world!");     // print Hello world!
-    refresh();                  // show printed content on screen
-    getch();                    // wait for user input
-    endwin();                   // end curses mode
+// method table
+static PyMethodDef TermUtilsMethods[] = {
+    {"interface", termUtils_interface, METH_VARARGS, 
+    "Launch the ncurses interface."},
+    {NULL, NULL, 0, NULL}   // sentinel
+};
 
-    return 0;
+#ifdef PY3K
+// python3 module definition/init
+static struct PyModuleDef termutilsmodule = {
+    PyModuleDef_HEAD_INIT,
+    "termUtils",
+    NULL,           // this is for documentation; currently have none
+    -1,
+    TermUtilsMethods
+};
+
+PyMODINIT_FUNC PyInit_termUtils(void) {
+    return PyModule_Create(&termutilsmodule);
 }
+#else 
+// python2 module definition/init
+PyMODINIT_FUNC inittermutils() {
+    Py_InitModule3("termutils", TermUtilsMethods, "mod doc");
+}
+#endif
